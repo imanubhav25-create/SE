@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NEET PG 2026 • AURA DASHBOARD</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        :root {
+            --accent-glow: #6ed8ff;
+        }
+
+        body, html {
+            height: 100vh;
+            width: 100vw;
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* WATER FROST GLASS LAYER */
+        #glass-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 20%, rgba(160, 210, 255, 0.18), rgba(70, 110, 150, 0.08));
+            backdrop-filter: blur(22px) brightness(1.1) saturate(1.7);
+            -webkit-backdrop-filter: blur(22px) brightness(1.1) saturate(1.7);
+            z-index: -1;
+        }
+
+        /* ========= AESTHETIC CLOCK WIDGET (with day, date, year) ========= */
+        #elegant-clock {
+            position: absolute;
+            top: 28px;
+            left: 28px;
+            background: rgba(20, 30, 45, 0.55);
+            backdrop-filter: blur(24px);
+            border-radius: 48px;
+            padding: 20px 28px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.3);
+            min-width: 260px;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+        .time-greeting {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+        .big-time {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #fff, #b8e1ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        .date-panel {
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+            flex-wrap: wrap;
+            border-top: 1px dashed rgba(255,255,255,0.3);
+            padding-top: 12px;
+            margin-top: 6px;
+        }
+        .day-name {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+        .full-date {
+            font-family: 'Inter', monospace;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        .year-badge {
+            font-family: 'Orbitron', monospace;
+            font-weight: 800;
+            background: rgba(0,0,0,0.35);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        /* ========= COUNTDOWN WIDGET (3:4 ratio, flag style) ========= */
+        #flag-countdown {
+            position: absolute;
+            top: 28px;
+            right: 28px;
+            width: 280px;
+            aspect-ratio: 3 / 4;
+            background: rgba(15, 25, 40, 0.65);
+            backdrop-filter: blur(28px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.25);
+            transition: all 0.2s;
+            z-index: 20;
+        }
+        .flag-top {
+            background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
+            padding: 18px 0 12px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+        .flag-top span {
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: rgba(0,0,0,0.4);
+            padding: 5px 14px;
+            border-radius: 40px;
+        }
+        .days-number {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 5.8rem;
+            font-weight: 900;
+            text-shadow: 0 0 20px currentColor;
+            background: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.1), transparent);
+        }
+        .flag-footer {
+            text-align: center;
+            padding: 18px 12px;
+            background: linear-gradient(0deg, rgba(0,0,0,0.4), transparent);
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* ========= WIDGETS – each will have UNIQUE COLOR (dynamically different) ========= */
+        .widget {
+            position: absolute;
+            background: rgba(12, 22, 35, 0.6);
+            backdrop-filter: blur(24px);
+            padding: 22px 24px;
+            border-radius: 36px;
+            width: 380px;
+            transition: all 0.2s ease;
+            border-left: 4px solid;
+            border-right: 1px solid rgba(255,255,255,0.2);
+            border-top: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+            z-index: 15;
+        }
+        #bottom-left { left: 28px; bottom: 28px; }
+        #bottom-right { right: 28px; bottom: 28px; }
+
+        .widget-header {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 3.5px;
+            margin-bottom: 18px;
+            font-weight: 800;
+            display: inline-block;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(4px);
+            padding: 5px 14px;
+            border-radius: 30px;
+        }
+
+        /* TARGET STYLES */
+        .target-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .target-pending {
+            font-weight: 800;
+            color: #fff;
+        }
+        .target-completed {
+            font-weight: 800;
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        .target-active-working {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid;
+            padding-left: 12px;
+            margin-left: -8px;
+            border-radius: 14px;
+            font-weight: 900;
+            text-shadow: 0 0 4px;
+        }
+        .status-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* SESSION STYLES */
+        .session-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 9px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+        .session-active-highlight {
+            background: rgba(0, 200, 255, 0.2);
+            border-left: 4px solid;
+            padding-left: 12px;
+            margin-left: -8px;
+            font-weight: 800;
+        }
+        .session-past {
+            opacity: 0.4;
+        }
+        .progress-wrapper {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            height: 12px;
+            border-radius: 20px;
+            margin: 12px 0 8px;
+            overflow: hidden;
+        }
+        #progress-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 20px;
+        }
+        .session-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+        #active-timer {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        #session-counter {
+            background: rgba(0,0,0,0.4);
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        /* DOOM SCREEN */
+        #brb-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(100, 140, 180, 0.2);
+            backdrop-filter: blur(32px);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .image-container {
+            max-width: 80vw;
+            max-height: 55vh;
+            margin-bottom: 28px;
+        }
+        #doom-pic {
+            max-width: 100%;
+            max-height: 55vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 40px;
+            border: 3px solid rgba(255,255,255,0.7);
+        }
+        #doom-msg {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(12px);
+            padding: 12px 28px;
+            border-radius: 60px;
+            margin-bottom: 28px;
+        }
+        .next-card {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(20px);
+            padding: 14px 38px;
+            border-radius: 60px;
+            border: 1px solid white;
+        }
+        #next-time {
+            font-family: 'Orbitron';
+            font-size: 2.2rem;
+            font-weight: 900;
+        }
+
+        @media (max-width: 900px) {
+            .widget { width: 320px; padding: 18px; }
+            #flag-countdown { width: 230px; }
+            .days-number { font-size: 4rem; }
+            .big-time { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="glass-layer"></div>
+
+<!-- AESTHETIC CLOCK with DAY, DATE, YEAR -->
+<div id="elegant-clock">
+    <div class="time-greeting">⏣ MOMENTUM</div>
+    <div class="big-time" id="live-time">--:--:--</div>
+    <div class="date-panel">
+        <div class="day-name" id="day-name">-----</div>
+        <div class="full-date" id="full-date">-- ----</div>
+        <div class="year-badge" id="year-number">----</div>
+    </div>
+</div>
+
+<!-- COUNTDOWN WIDGET: 3:4 RATIO / FLAG STYLE, DAYS LEFT + NEET PG 2026 -->
+<div id="flag-countdown">
+    <div class="flag-top"><span>⚡ DAYS LEFT ⚡</span></div>
+    <div class="days-number" id="countdown-days-big">--</div>
+    <div class="flag-footer">NEET PG 2026</div>
+</div>
+
+<!-- TARGET TRACKER -->
+<div id="bottom-left" class="widget">
+    <div class="widget-header">🎯 TARGET TRACKER</div>
+    <div id="target-list"></div>
+</div>
+
+<!-- SESSION TRACKER -->
+<div id="bottom-right" class="widget">
+    <div class="widget-header">📚 ACTIVE SESSION</div>
+    <div id="active-name" style="font-size: 1.3rem; font-weight: 800;">--</div>
+    <div class="progress-wrapper"><div id="progress-fill"></div></div>
+    <div class="session-meta">
+        <div id="active-timer">⏱️ --:--</div>
+        <div id="session-counter">--/--</div>
+    </div>
+    <div class="widget-header" style="margin-top: 20px;">📅 DAY SCHEDULE</div>
+    <div id="schedule-list"></div>
+</div>
+
+<!-- DOOM BREAK OVERLAY -->
+<div id="brb-screen">
+    <div class="image-container"><img id="doom-pic" src="" alt="focus"></div>
+    <div id="doom-msg"></div>
+    <div class="next-card"><div style="font-size:0.7rem;">NEXT SESSION IN</div><div id="next-time">--:--:--</div></div>
+</div>
+
+<script>
+    // ===================== SHEET & CONFIG =====================
+    const SHEET_ID = "1k1bim9rPcs4dhYZY9qZKAqJHZkxMwTkSlX1R0JPhgSY";
+    const SHEET_CSV = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    const EXAM_DATE = new Date("2026-08-30T00:00:00");  // shows days left (ends 0 on exam day)
+    
+    // DOOM VAULT
+    const doomVault = [
+        {id: "1Wwn3CigkQlrxcCozt2-99gT3HtqpbQ8p", msg: "⚔️ Victory awaits the relentless."},
+        {id: "1jsNtnjzG5rLtwKcDQ72STE2EF0gBhb_B", msg: "❄️ Frost focus. Push harder."},
+        {id: "1pCBbPsox531__avBMNPQiUmxlMJtrXyl", msg: "💀 DOOM: your rank is being forged."},
+        {id: "1tf9YJj7oeDEo0lOJQ_bUOA9WPF15zDRh", msg: "🏆 One step closer each day."},
+        {id: "1y0YxO2TF5yUWQlrsZkLI0BKu4Ydo2YKa", msg: "🛡️ Don't break. Conquer."},
+        {id: "1FwPYEATR6_PkeXya_YdT4FoaLT840fLG", msg: "⚡ Rest = ammunition. Reload."}
+    ];
+    
+    let allSheetData = [];
+    
+    // ========== UNIQUE COLOR GENERATOR for each widget (different at any moment) ==========
+    function getRandomPastel() {
+        const hue = Math.floor(Math.random() * 360);
+        // vibrant but glass-friendly
+        return `hsl(${hue}, 75%, 58%)`;
+    }
+    
+    function applyUniqueWidgetColors() {
+        const widgets = document.querySelectorAll('.widget');
+        const clockWidget = document.getElementById('elegant-clock');
+        const countdownFlag = document.getElementById('flag-countdown');
+        
+        // each widget gets a completely different color
+        const color1 = getRandomPastel();
+        const color2 = getRandomPastel();
+        const color3 = getRandomPastel();
+        const color4 = getRandomPastel();
+        
+        if(widgets[0]) widgets[0].style.borderLeftColor = color1;
+        if(widgets[1]) widgets[1].style.borderLeftColor = color2;
+        if(clockWidget) clockWidget.style.borderColor = color3;
+        if(countdownFlag) countdownFlag.style.borderColor = color4;
+        
+        // also apply accent to progress fill and active timer individually (dynamic)
+        const progressFill = document.getElementById('progress-fill');
+        const timerDiv = document.getElementById('active-timer');
+        if(progressFill) progressFill.style.backgroundColor = color1;
+        if(timerDiv) timerDiv.style.color = color2;
+        
+        // store for later use (active target highlight uses border left)
+        document.documentElement.style.setProperty('--accent-glow', color1);
+    }
+    
+    // refresh colors every minute? but also call on every render so they shift at random intervals
+    let lastColorChange = 0;
+    function maybeShiftColors() {
+        const now = Date.now();
+        if(now - lastColorChange > 45000) { // change every 45 seconds for fresh feel
+            applyUniqueWidgetColors();
+            lastColorChange = now;
+        }
+    }
+    
+    // helper IST
+    function getCurrentIST() {
+        const now = new Date();
+        const istOffset = 5.5 * 60 * 60 * 1000;
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        return new Date(utc + istOffset);
+    }
+    
+    function formatTimeHM(date) {
+        return date.getHours().toString().padStart(2,'0') + ":" + date.getMinutes().toString().padStart(2,'0');
+    }
+    function timeToMinutes(t) {
+        if(!t) return 0;
+        let [h,m] = t.split(':').map(Number);
+        return h*60+m;
+    }
+    
+    // UPDATE AESTHETIC CLOCK (with day, date, year)
+    function updateElegantClock() {
+        const ist = getCurrentIST();
+        const hours = ist.getHours();
+        const minutes = ist.getMinutes();
+        const seconds = ist.getSeconds();
+        const timeStr = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        document.getElementById('live-time').innerText = timeStr;
+        
+        const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const dayName = days[ist.getDay()];
+        const dateNum = ist.getDate();
+        const monthName = months[ist.getMonth()];
+        const year = ist.getFullYear();
+        document.getElementById('day-name').innerText = dayName;
+        document.getElementById('full-date').innerText = `${dateNum} ${monthName}`;
+        document.getElementById('year-number').innerText = year;
+    }
+    
+    // update countdown (DAYS LEFT) on flag widget
+    function updateCountdownFlag() {
+        const ist = getCurrentIST();
+        const diffMs = Math.max(0, EXAM_DATE.getTime() - ist.getTime());
+        const daysLeft = Math.floor(diffMs / (1000*3600*24));
+        document.getElementById('countdown-days-big').innerText = daysLeft;
+    }
+    
+    // fetch google sheet
+    async function fetchSheetData() {
+        try {
+            const resp = await fetch(`${SHEET_CSV}&nocache=${Date.now()}`);
+            if(!resp.ok) throw new Error();
+            const txt = await resp.text();
+            const rows = txt.split(/\r?\n/).filter(r => r.trim());
+            const parsed = rows.map(r => r.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+            allSheetData = parsed.filter(r => r.length && r[0].length);
+            console.log("sheet synced");
+        } catch(e) { console.warn("sheet err"); if(!allSheetData.length) allSheetData=[]; }
+    }
+    
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=> m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+    
+    // TARGET RENDER (active/incomplete highlight)
+    function renderTargets() {
+        const targets = allSheetData.filter(r => r[0] && r[0].toLowerCase() === "target");
+        const container = document.getElementById('target-list');
+        if(!container) return;
+        container.innerHTML = "";
+        if(targets.length === 0) {
+            container.innerHTML = '<div class="target-item">✨ Add "Target" rows (col A:Target, B:task, C:status)</div>';
+            return;
+        }
+        let firstIncompleteIdx = -1;
+        for(let i=0;i<targets.length;i++) {
+            let stat = (targets[i][2] || "").toLowerCase();
+            if(stat !== "complete" && stat !== "done" && stat !== "✓") { firstIncompleteIdx = i; break; }
+        }
+        targets.forEach((row, idx) => {
+            let task = row[1] || "Untitled";
+            let statusRaw = (row[2] || "").toLowerCase();
+            let isComplete = (statusRaw === "complete" || statusRaw === "done" || statusRaw === "✓");
+            let isActiveWorking = (!isComplete && idx === firstIncompleteIdx);
+            let statusText = isComplete ? "✓ DONE" : (isActiveWorking ? "● ACTIVE" : "○ PENDING");
+            let additionalClass = "";
+            if(isComplete) additionalClass = "target-completed";
+            else if(isActiveWorking) additionalClass = "target-active-working target-pending";
+            else additionalClass = "target-pending";
+            container.innerHTML += `<div class="target-item ${additionalClass}" style="${isActiveWorking ? 'border-left-color: ' + getComputedStyle(document.documentElement).getPropertyValue('--accent-glow') : ''}"><span>${escapeHtml(task)}</span><span class="status-badge">${statusText}</span></div>`;
+        });
+    }
+    
+    // SESSION + ACTIVE TIMER + COUNTER
+    function renderSessions() {
+        const sessionsRaw = allSheetData.filter(r => r[0] && r[0].toLowerCase() === "session");
+        const sessions = [];
+        for(let row of sessionsRaw) {
+            let name = row[1] || "Session";
+            let range = row[2] || "00:00-00:00";
+            let [startStr, endStr] = range.includes('-') ? range.split('-') : ["00:00","00:00"];
+            sessions.push({ name, startStr, endStr, startMins: timeToMinutes(startStr), endMins: timeToMinutes(endStr) });
+        }
+        sessions.sort((a,b)=> a.startMins - b.startMins);
+        const currentMins = timeToMinutes(formatTimeHM(getCurrentIST()));
+        let activeSession = null, activeIndex = -1;
+        for(let i=0;i<sessions.length;i++) {
+            if(currentMins >= sessions[i].startMins && currentMins < sessions[i].endMins) {
+                activeSession = sessions[i];
+                activeIndex = i;
+                break;
+            }
+        }
+        const counterDiv = document.getElementById('session-counter');
+        if(counterDiv) {
+            if(activeSession && activeIndex !== -1) counterDiv.innerText = `${activeIndex+1}/${sessions.length}`;
+            else if(sessions.length) counterDiv.innerText = `0/${sessions.length}`;
+            else counterDiv.innerText = `--/--`;
+        }
+        const activeNameDiv = document.getElementById('active-name');
+        const progressFill = document.getElementById('progress-fill');
+        const timerDiv = document.getElementById('active-timer');
+        const brb = document.getElementById('brb-screen');
+        const nextTimeSpan = document.getElementById('next-time');
+        const ist = getCurrentIST();
+        
+        if(activeSession) {
+            if(brb) brb.style.display = 'none';
+            activeNameDiv.innerText = activeSession.name;
+            const totalDur = activeSession.endMins - activeSession.startMins;
+            let percent = totalDur > 0 ? ((currentMins - activeSession.startMins) / totalDur) * 100 : 0;
+            percent = Math.min(100, Math.max(0, percent));
+            progressFill.style.width = percent + "%";
+            const remaining = activeSession.endMins - currentMins;
+            if(remaining > 0) {
+                const hrs = Math.floor(remaining / 60);
+                const mins = remaining % 60;
+                const secs = 59 - ist.getSeconds();
+                if(hrs>0) timerDiv.innerText = `${hrs}h ${mins}m ${secs}s`;
+                else timerDiv.innerText = `${mins}m ${secs}s`;
+            } else timerDiv.innerText = "0:00";
+        } else {
+            activeNameDiv.innerText = "❄️ BREAK ZONE";
+            progressFill.style.width = "0%";
+            timerDiv.innerText = "--:--";
+            if(brb && brb.style.display !== 'flex') {
+                const rand = Math.floor(Math.random() * doomVault.length);
+                const doom = doomVault[rand];
+                document.getElementById('doom-pic').src = `https://lh3.googleusercontent.com/d/${doom.id}`;
+                document.getElementById('doom-msg').innerText = doom.msg;
+                brb.style.display = 'flex';
+            }
+            let next = null;
+            for(let s of sessions) if(currentMins < s.startMins) { next = s; break; }
+            if(next && nextTimeSpan) {
+                let diff = next.startMins - currentMins;
+                if(diff<0) diff=0;
+                const hh = Math.floor(diff/60);
+                const mm = diff%60;
+                const ss = 60 - ist.getSeconds();
+                nextTimeSpan.innerText = `${hh.toString().padStart(2,'0')}:${mm.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')}`;
+            } else if(nextTimeSpan) nextTimeSpan.innerText = sessions.length ? "DONE ✅" : "--";
+        }
+        
+        // schedule list with active highlight
+        const scheduleContainer = document.getElementById('schedule-list');
+        if(scheduleContainer) {
+            scheduleContainer.innerHTML = "";
+            sessions.forEach(s => {
+                const isActive = (activeSession && activeSession.name === s.name);
+                const isPast = (!isActive && currentMins >= s.endMins);
+                let activeClass = isActive ? 'session-active-highlight' : '';
+                let pastStyle = isPast ? 'session-past' : '';
+                scheduleContainer.innerHTML += `<div class="session-row ${activeClass} ${pastStyle}" style="${isActive ? 'border-left-color: ' + getComputedStyle(document.documentElement).getPropertyValue('--accent-glow') : ''}"><span>${escapeHtml(s.name)}</span><span>${s.startStr}-${s.endStr}</span></div>`;
+            });
+            if(sessions.length===0) scheduleContainer.innerHTML = '<div class="session-row">📌 Add "Session" rows in sheet</div>';
+        }
+    }
+    
+    // main refresh loop
+    function refreshAll() {
+        updateElegantClock();
+        updateCountdownFlag();
+        renderTargets();
+        renderSessions();
+        maybeShiftColors();
+    }
+    
+    async function syncAndRefresh() {
+        await fetchSheetData();
+        refreshAll();
+    }
+    
+    // start
+    setInterval(refreshAll, 1000);
+    setInterval(syncAndRefresh, 20000);
+    syncAndRefresh();
+    applyUniqueWidgetColors();
+    lastColorChange = Date.now();
+</script>
+</body>
+</html>
